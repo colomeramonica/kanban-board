@@ -88,7 +88,7 @@ function Draggable({ id, children }: { id: string; children: React.ReactNode }) 
     };
 
     return (
-        <div ref={setNodeRef} style={style} {...listeners} {...attributes} className="bg-slate-100 p-2 rounded">
+        <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
             {children}
         </div>
     );
