@@ -1,3 +1,5 @@
+import TaskModal from "./TaskModal";
+
 interface Task {
     title: string;
     description: string;
@@ -11,8 +13,12 @@ export default function TaskCard({ task }: { task: Task }) {
         return `${day}/${month}/${year}`;
     };
 
+    const openTaskModal = () => {
+
+    }
+
     return (
-        <div className="bg-white flex flex-col h-44 justify-between p-3 rounded-xl w-80">
+        <div className="bg-white flex flex-col h-44 justify-between p-3 rounded-xl w-80" onClick={openTaskModal}>
             <h3 className="font-semibold text-slate-800 text-sm">
                 {task.title}
             </h3>
