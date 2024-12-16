@@ -1,6 +1,7 @@
 import React from 'react';
-import { DndContext, useDraggable, useDroppable, DragEndEvent } from '@dnd-kit/core';
-import TaskCard from './TaskCard';
+import { DndContext, closestCenter, useDraggable, useDroppable, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import TaskCard from './TaskItem';
 
 type Task = {
     id: string;
@@ -24,83 +25,38 @@ type Data = {
 
 const initialData: Data = {
     tasks: {
-        'task-1': {
-            id: 'task-1',
-            title: 'Task 1',
-            description: 'Description 1',
-            date: '2022-01-01',
-            responsible: ['John Doe', 'Jane Doe'],
-        },
-        'task-2': {
-            id: 'task-2',
-            title: 'Task 2',
-            description: 'Description 2',
-            date: '2022-01-02',
-            responsible: ['Jane Doe'],
-        },
-        'task-3': {
-            id: 'task-3',
-            title: 'Task 3',
-            description: 'Description 3',
-            date: '2022-01-03',
-            responsible: ['John Doe'],
-        },
-        'task-4': {
-            id: 'task-4',
-            title: 'Task 4',
-            description: 'Description 4',
-            date: '2022-01-04',
-            responsible: [],
-        },
+        'task-1': { id: 'task-1', title: 'Task 1', description: 'Description 1', date: '2022-01-01', responsible: ['John Doe'] },
+        'task-2': { id: 'task-2', title: 'Task 2', description: 'Description 2', date: '2022-01-02', responsible: ['Jane Doe'] },
+        'task-3': { id: 'task-3', title: 'Task 3', description: 'Description 3', date: '2022-01-03', responsible: ['John Doe'] },
     },
     columns: {
-        'ideas': {
-            id: 'ideas',
-            title: 'Ideas',
-            taskIds: ['task-1', 'task-2'],
-        },
-        'todo': {
-            id: 'todo',
-            title: 'To do',
-            taskIds: ['task-3'],
-        },
-        'doing': {
-            id: 'doing',
-            title: 'Doing',
-            taskIds: ['task-4'],
-        },
-        'done': {
-            id: 'done',
-            title: 'Done',
-            taskIds: [],
-        },
+        ideas: { id: 'ideas', title: 'Ideas', taskIds: ['task-1', 'task-2'] },
+        todo: { id: 'todo', title: 'To Do', taskIds: ['task-3'] },
+        done: { id: 'done', title: 'Done', taskIds: [] },
     },
-    columnOrder: ['ideas', 'todo', 'doing', 'done'],
+    columnOrder: ['ideas', 'todo', 'done'],
 };
 
 function Draggable({ id, children }: { id: string; children: React.ReactNode }) {
-    const { attributes, listeners, setNodeRef, transform } = useDraggable({
-        id,
-    });
+    const { attributes, listeners, setNodeRef, transform, transition } = useDraggable({ id });
 
     const style = {
         transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+        transition,
     };
 
     return (
-        <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+        <div ref={setNodeRef} style={style} {...attributes} {...listeners} data-id={id}>
             {children}
         </div>
     );
 }
 
 function Droppable({ id, children }: { id: string; children: React.ReactNode }) {
-    const { setNodeRef } = useDroppable({
-        id,
-    });
+    const { setNodeRef } = useSortable({ id });
 
     return (
-        <div ref={setNodeRef} className="flex flex-col gap-2">
+        <div ref={setNodeRef} className="min-h-[200px] p-4 rounded-md" data-id={id}>
             {children}
         </div>
     );
@@ -109,68 +65,70 @@ function Droppable({ id, children }: { id: string; children: React.ReactNode }) 
 export default function Board() {
     const [data, setData] = React.useState(initialData);
 
-    const onDragEnd = (event: DragEndEvent) => {
+    const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
-        if (!over) {
-            return;
-        }
+        if (!over) return;
 
-        const sourceColumnId = active?.data?.current?.sortable.containerId;
-        const destinationColumnId = over?.data?.current?.sortable?.containerId;
+        const sourceColumnId = active.data.current?.sortable?.containerId;
+        const destinationColumnId = over.data.current?.sortable?.containerId;
+
+        if (!sourceColumnId || !destinationColumnId) return;
 
         if (sourceColumnId === destinationColumnId) {
-            return;
+            return; // Reordering within the same column is not implemented yet
         }
 
         const sourceColumn = data.columns[sourceColumnId];
         const destinationColumn = data.columns[destinationColumnId];
 
-        const sourceTaskIds = Array.from(sourceColumn.taskIds);
-        const destinationTaskIds = Array.from(destinationColumn.taskIds);
+        const sourceTasks = Array.from(sourceColumn.taskIds);
+        const destinationTasks = Array.from(destinationColumn.taskIds);
 
-        sourceTaskIds.splice(sourceTaskIds.indexOf(active?.id as string), 1);
-        destinationTaskIds.splice(over?.index, 0, active?.id as string);
+        // Remove from source, add to destination
+        const taskId = active.id;
+        sourceTasks.splice(sourceTasks.indexOf(taskId), 1);
+        destinationTasks.push(taskId);
 
-        const newState = {
+        const updatedState = {
             ...data,
             columns: {
                 ...data.columns,
-                [sourceColumnId]: {
-                    ...sourceColumn,
-                    taskIds: sourceTaskIds,
-                },
-                [destinationColumnId]: {
-                    ...destinationColumn,
-                    taskIds: destinationTaskIds,
-                },
+                [sourceColumnId]: { ...sourceColumn, taskIds: sourceTasks },
+                [destinationColumnId]: { ...destinationColumn, taskIds: destinationTasks },
             },
         };
 
-        setData(newState);
+        setData(updatedState);
     };
 
     return (
-        <DndContext onDragEnd={onDragEnd}>
+        <DndContext
+            collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <div className="flex flex-row gap-4 items-start justify-around p-4 w-full">
-                {data.columnOrder.map((columnId) => {
-                    const column = data.columns[columnId];
-                    const tasks = column.taskIds.map((taskId) => data.tasks[taskId]);
+                {
+                    data.columnOrder.map((columnId) => {
+                        const column = data.columns[columnId];
 
-                    return (
-                        <div key={column.id} className="flex flex-col p-4 rounded w-1/4">
-                            <h3 className="font-semibold mb-2 text-slate-800 text-sm">{column.title}</h3>
-                            <Droppable id={column.id}>
-                                {tasks.map((task) => (
-                                    <Draggable key={task.id} id={task.id}>
-                                        <TaskCard task={task} />
-                                    </Draggable>
-                                ))}
-                            </Droppable>
-                        </div>
-                    );
-                })}
-            </div>
-        </DndContext>
+                        return (
+                            <SortableContext key={columnId} items={column.taskIds} strategy={verticalListSortingStrategy}>
+                                <Droppable id={column.id}>
+                                    <div className="flex flex-col p-4 rounded w-1/4">
+                                        <h3 className="font-bold text-lg">{column.title}</h3>
+                                        <div className="min-h-[200px] p-4 rounded-md">
+                                            {column.taskIds.map((taskId) => (
+                                                <Draggable key={taskId} id={taskId}>
+                                                    <TaskCard task={data.tasks[taskId]} />
+                                                </Draggable>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </Droppable>
+                            </SortableContext>
+                        );
+                    })
+                }
+            </div >
+        </DndContext >
     );
 }
