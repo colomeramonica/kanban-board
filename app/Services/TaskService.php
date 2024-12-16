@@ -6,15 +6,6 @@ use App\Models\Task;
 
 class TaskService
 {
-    /**
-     * Retrieves a list of tasks for a given user.
-     *
-     * @param int $userId The ID of the user whose tasks are to be retrieved.
-     *
-     * @return \Illuminate\Database\Eloquent\Collection A collection of tasks associated with the given user.
-     * Each task is represented as an instance of the Task model, and includes the associated user.
-     * The tasks are ordered by their 'order' column.
-     */
     public function list($userId)
     {
         return Task::with('user')->where('user_id', $userId)
@@ -26,17 +17,27 @@ class TaskService
         return Task::find($id);
     }
 
-    public function store($data): void
+    public function store($data): object
     {
-        Task::create($data);
+        return Task::create($data);
     }
-    public function update(int $id, array $data): void
+    public function update(int $id, array $data): object
+    {
+        $task = $this->getById($id);
+        if (!$task) {
+            return null;
+        }
+
+        return $task->update($data);
+    }
+
+    public function updateStatus($id, $status): void
     {
         $task = $this->getById($id);
         if (!$task) {
             return;
         }
 
-        $task->update($data);
+        $task->update(['stage' => $status]);
     }
 }

@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tasks', function (Blueprint $table) {
+        Schema::create('user_tasks', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->softDeletes();
-            $table->string('title');
-            $table->text('description');
-            $table->date('date');
-            $table->enum('stage', ['ideas', 'todo', 'doing', 'done']);
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('task_id');
+
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('task_id')->references('id')->on('tasks');
         });
     }
 
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tasks');
+        Schema::dropIfExists('user_tasks');
     }
 };

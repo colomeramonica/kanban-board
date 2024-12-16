@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\User\SignInRequest;
 use App\Services\UserService;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -24,7 +25,7 @@ class UserController extends Controller
         $user = $this->userService->getById($id);
         return response()->json($user);
     }
-    public function signIn(SignInRequest $request)
+    public function signIn(Request $request)
     {
         $this->userService->store($request->all());
         return response()->json([

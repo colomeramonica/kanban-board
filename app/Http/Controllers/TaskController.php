@@ -6,16 +6,19 @@ use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Models\Task;
 use App\Services\TaskService;
+use App\Services\UserTasksService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
     protected ?TaskService $taskService = null;
+    protected ?UserTasksService $userTasksService = null;
 
-    public function __construct(TaskService $taskService)
+    public function __construct(TaskService $taskService, UserTasksService $userTasksService)
     {
         $this->taskService = $taskService;
+        $this->userTasksService = $userTasksService;
     }
 
     public function list(Request $request)
@@ -26,9 +29,21 @@ class TaskController extends Controller
         return response()->json($tasks);
     }
 
-    public function store(CreateTaskRequest $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
-        $this->taskService->store($request->all());
+        $data = $request->all();
+        $userId = $data['responsible'];
+        unset($data['responsible']);
+
+        try {
+            $task = $this->taskService->store($data);
+            $this->userTasksService->store(['user_id' => $userId, 'task_id' => $task->id]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
 
         return response()->json([
             'success' => true,
@@ -48,18 +63,8 @@ class TaskController extends Controller
 
     public function get(int $id): JsonResponse
     {
-        $task = $this->taskService->get($id);
+        $task = $this->taskService->getById($id);
 
         return response()->json($task);
-    }
-
-    public function delete(int $id): JsonResponse
-    {
-        $this->taskService->delete($id);
-
-        return response()->json([
-            'success' => true,
-            'message' => "Task deleted successfully.",
-        ]);
     }
 }
