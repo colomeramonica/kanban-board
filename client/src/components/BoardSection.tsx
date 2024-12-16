@@ -27,8 +27,8 @@ const BoardSection = ({ id, title, tasks }: BoardSectionProps) => {
                 strategy={verticalListSortingStrategy}
             >
                 <div ref={setNodeRef}>
-                    {tasks.map((task) => (
-                        <div className="flex flex-col gap-4 rounded w-1/4">
+                    {tasks.map((task, index) => (
+                        <div className="flex flex-col gap-4 rounded w-1/4" key={index}>
                             <SortableTaskItem id={task.id}>
                                 <TaskItem task={task} />
                             </SortableTaskItem>

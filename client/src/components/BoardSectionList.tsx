@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     useSensors,
     useSensor,
@@ -20,6 +20,9 @@ import { getTaskById } from '../utils/tasks.js';
 import { findBoardSectionContainer, initializeBoard } from '../utils/board.ts';
 import BoardSection from './BoardSection.tsx';
 import TaskItem from './TaskItem.tsx';
+import { getAllTasks } from '../api.ts';
+
+const registeredTasks = getAllTasks();
 
 const BoardSectionList = () => {
     const tasks = INITIAL_TASKS;
@@ -41,7 +44,6 @@ const BoardSectionList = () => {
     };
 
     const handleDragOver = ({ active, over }: DragOverEvent) => {
-        // Find the containers
         const activeContainer = findBoardSectionContainer(
             boardSections,
             active.id as string
@@ -63,7 +65,6 @@ const BoardSectionList = () => {
             const activeItems = boardSection[activeContainer];
             const overItems = boardSection[overContainer];
 
-            // Find the indexes for the items
             const activeIndex = activeItems.findIndex(
                 (item) => item.id === active.id
             );
@@ -142,7 +143,7 @@ const BoardSectionList = () => {
                 onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
             >
-                <div className="gap-x-[80px] grid grid-cols-4 ml-24 p-4">
+                <div className="gap-x-[80px] grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 ml-24 p-4 sm:grid-cols-2">
                     {Object.keys(boardSections).map((boardSectionKey) => (
                         <div className="" key={boardSectionKey}>
                             <BoardSection

@@ -45,4 +45,21 @@ class TaskController extends Controller
             'message' => "Task updated successfully.",
         ], 201);
     }
+
+    public function get(int $id): JsonResponse
+    {
+        $task = $this->taskService->get($id);
+
+        return response()->json($task);
+    }
+
+    public function delete(int $id): JsonResponse
+    {
+        $this->taskService->delete($id);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Task deleted successfully.",
+        ]);
+    }
 }

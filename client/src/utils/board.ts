@@ -17,14 +17,14 @@ export const initializeBoard = (tasks: Task[]) => {
 
 export const findBoardSectionContainer = (
   boardSections: BoardSections,
-  id: string
+  title: string
 ) => {
-  if (id in boardSections) {
-    return id;
+  if (title in boardSections) {
+    return title;
   }
 
   const container = Object.keys(boardSections).find((key) =>
-    boardSections[key].find((item) => item.id === id)
+    boardSections[key].find((item) => item.title === title)
   );
   return container;
 };

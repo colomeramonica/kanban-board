@@ -1,13 +1,7 @@
 import { useState } from "react";
+import { Task } from "../types";
 import TaskDetails from "./TaskDetails";
 import { createPortal } from "react-dom";
-
-interface Task {
-    title: string;
-    description: string;
-    date: string;
-    responsible: string[];
-}
 
 export default function TaskCard({ task }: { task: Task }) {
     const [showModal, setShowModal] = useState(false);
@@ -17,7 +11,8 @@ export default function TaskCard({ task }: { task: Task }) {
         return `${day}/${month}/${year}`;
     };
 
-    const openTaskModal = () => {
+    const openTaskModal = (e: React.MouseEvent) => {
+        e.stopPropagation()
         setShowModal(true);
     }
 
@@ -26,10 +21,11 @@ export default function TaskCard({ task }: { task: Task }) {
     }
 
     return (
-        <section>
-            <div className="bg-white flex flex-col h-44 justify-between max-w-80 mb-3 p-3 rounded-xl w-80"
-                onClick={openTaskModal}>
-                <h3 className="font-semibold text-slate-800 text-sm">
+        <>
+            <div
+                className="bg-white flex flex-col h-44 justify-between max-w-80 mb-3 p-3 rounded-xl w-80"
+            >
+                <h3 className="font-semibold text-slate-800 text-sm" onClick={openTaskModal}>
                     {task.title}
                 </h3>
                 <div className="align-middle flex flex-col gap-1 justify-start">
@@ -43,17 +39,19 @@ export default function TaskCard({ task }: { task: Task }) {
                     </div>
                 </div>
                 <div className="flex flex-row gap-2 justify-start mt-2">
-                    {task.responsible.map((name) => (
-                        <div className="bg-blue-500 p-2 rounded-lg text-white text-xs">
+                    {task.responsible.map((name, idx) => (
+                        <div className="bg-blue-500 p-2 rounded-lg text-white text-xs" key={idx}>
                             {name}
                         </div>
                     ))}
                 </div>
             </div>
             {showModal && createPortal(
-                <TaskDetails onClose={onClose} />,
+                <TaskDetails
+                    task={task}
+                    onClose={onClose} />,
                 document.body
             )}
-        </section>
+        </>
     );
 }
