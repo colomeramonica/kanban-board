@@ -38,7 +38,7 @@ docker compose up -d
 Entre no container criado pelo Docker e atualize as dependências, além de inicializar o banco de dados:
 
 ``` bash
-docker exec -it project /bin/bash  
+docker exec -it app /bin/bash  
 composer install
 php artisan migrate && php artisan db:seed
 ```
@@ -57,7 +57,8 @@ Para executar a aplicação, abra dois terminais:
 Terminal 1: Inicie a API do Laravel:
 
 ``` bash
-cd kanbam-board  
+cd kanbam-board
+docker exec -it app /bin/bash  
 php artisan serve
 ```
 
