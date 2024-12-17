@@ -21,10 +21,16 @@ class TaskController extends Controller
         $this->userTasksService = $userTasksService;
     }
 
-    public function list(Request $request)
+    public function list(): JsonResponse
     {
-        $userId = $request->user()->id;
-        $tasks = $this->taskService->list($userId);
+        try {
+            $tasks = $this->taskService->list();
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
 
         return response()->json($tasks);
     }
@@ -51,9 +57,19 @@ class TaskController extends Controller
         ], 201);
     }
 
-    public function update(UpdateTaskRequest $request, int $id): JsonResponse
+    public function update(int $id, Request $request): JsonResponse
     {
-        $this->taskService->update($id, $request->all());
+        try {
+            $data = $request->all();
+            $data['responsible'] = isset($data['users']) ? $data['users'] : [];
+            unset($data['users']);
+            $this->taskService->update($id, $request->all());
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
 
         return response()->json([
             'success' => true,
@@ -61,9 +77,41 @@ class TaskController extends Controller
         ], 201);
     }
 
-    public function get(int $id): JsonResponse
+    public function delete(int $id): JsonResponse
     {
         $task = $this->taskService->getById($id);
+        if (!$task) {
+            return response()->json([
+                'success' => false,
+                'message' => "Task not found.",
+            ], 404);
+        }
+
+        try {
+            $this->taskService->delete($id);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Task deleted successfully.",
+        ], 201);
+    }
+
+    public function get(int $id): JsonResponse
+    {
+        try {
+            $task = $this->taskService->getById($id);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
+        }
 
         return response()->json($task);
     }

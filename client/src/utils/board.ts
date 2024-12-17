@@ -5,7 +5,7 @@ import { getTasksByStatus } from './tasks';
 export const initializeBoard = (tasks: Task[]) => {
   const boardSections: BoardSections = {};
 
-  Object.keys(BOARD_SECTIONS).forEach((boardSectionKey) => {
+    Object.keys(BOARD_SECTIONS).forEach((boardSectionKey) => {
     boardSections[boardSectionKey] = getTasksByStatus(
       tasks,
       boardSectionKey as Status
@@ -17,14 +17,14 @@ export const initializeBoard = (tasks: Task[]) => {
 
 export const findBoardSectionContainer = (
   boardSections: BoardSections,
-  title: string
+  id: string
 ) => {
-  if (title in boardSections) {
-    return title;
+  if (id in boardSections) {
+    return id;
   }
 
   const container = Object.keys(boardSections).find((key) =>
-    boardSections[key].find((item) => item.title === title)
+    boardSections[key].find((item) => item.id === id)
   );
   return container;
 };

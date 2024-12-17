@@ -14,7 +14,10 @@ export default function TaskDetails({ task, onClose }: TaskDetailsProps) {
             </button>
             <div className="bg-white h-auto p-8 relative rounded-lg shadow-lg w-[430px] z-10">
                 <h1 className="flex font-semibold justify-start pt-2 text-center text-gray-600 text-xl">{task.title}</h1>
-                <p className="flex justify-start pb-4 text-gray-500 text-xs">{task.responsible}</p>
+                {task.users &&
+                    task.users.map((user) => (
+                        <p className="flex justify-start pb-4 text-gray-500 text-xs">{user.name}</p>
+                    ))}
                 <div className="align-middle bg-slate-500 flex flex-col justify-start p-2 rounded-lg">
                     <p className="font-semibold text-[13px] text-slate-400">{task.description}</p>
                 </div>

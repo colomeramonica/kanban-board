@@ -20,6 +20,12 @@ class UserController extends Controller
         $users = $this->userService->getAll();
         return response()->json($users);
     }
+
+    public function listUsers()
+    {
+        $users = $this->userService->getAll();
+        return response()->json($users);
+    }
     public function show($id)
     {
         $user = $this->userService->getById($id);

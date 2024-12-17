@@ -3,9 +3,17 @@
 namespace App\Services;
 
 use App\Models\UserTask;
+use App\Models\Task;
+use App\Models\User;
 
 class UserTasksService
 {
+    public function getAll()
+    {
+        return Task::with(['users' => function ($query) {
+            $query->select('users.id', 'users.name');
+        }])->get();
+    }
     public function store($data)
     {
         UserTask::create($data);

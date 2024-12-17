@@ -6,15 +6,33 @@ export type NewTask = {
     stage: 'ideas';
 };
 
-export const createNewTask = (task: NewTask) => {
-    return fetch('/api/tasks', {
+export const createNewTask = async (task: NewTask) => {
+    const response = await fetch('http://localhost:8000/api/tasks/new', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(task),
-    }).then((res) => res.json());
+    });
+    return await response.json();
 }
-export const getAllTasks = () => {
-    return fetch('/api/tasks').then((res) => res.json());
+export const getAllTasks = async () => {
+    const response = await fetch('http://localhost:8000/api/tasks/list');
+    return await response.json();
+}
+
+export const loadUsers = async () => {
+    const response = await fetch('http://localhost:8000/api/users/list');
+    return await response.json();
+}
+
+export const updateTaskStatus = async (taskId: string, status: string) => {
+    const response = await fetch(`http://localhost:8000/api/tasks/${taskId}/update`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ stage: status }),
+    });
+    return await response.json();
 }

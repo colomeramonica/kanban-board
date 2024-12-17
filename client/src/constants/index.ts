@@ -1,6 +1,6 @@
 export const BOARD_SECTIONS = {
-    ideas: 'ideas',
-    todo: 'todo',
-    doing: 'doing',
-    done: 'done',
+    ideas: 'Ideias',
+    todo: 'A fazer',
+    doing: 'Fazendo',
+    done: 'Feito',
   };

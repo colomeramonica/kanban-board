@@ -27,6 +27,13 @@ class UserTaskController extends Controller
         return response()->json(201);
     }
 
+    public function getAll(): JsonResponse
+    {
+        $userTasks = $this->userTasksService->getAll();
+
+        return response()->json($userTasks);
+    }
+
     public function getTasksByUser($userId)
     {
         $tasks = $this->userTasksService->getTasksByUser($userId);

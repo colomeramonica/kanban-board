@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import logo from '../assets/logo.png';
 import { createPortal } from 'react-dom';
-import TaskModal from './TaskModal';
+import TaskModal from './NewTaskModal';
 
 export default function NavBar() {
     const [showModal, setShowModal] = useState(false);

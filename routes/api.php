@@ -8,13 +8,15 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'users'], function () {
     Route::post('login', [UserController::class, 'login']);
     Route::post('sign-in', [UserController::class, 'signIn']);
+    Route::get('list', [UserController::class, 'listUsers']);
 });
 
 Route::group(['prefix' => 'tasks'], function () {
     Route::post('new', [TaskController::class, 'store']);
-    Route::get('list', [TaskController::class, 'list']);
-    Route::put('update/{id}', [TaskController::class, 'update']);
+    Route::get('list', [UserTaskController::class, 'getAll']);
+    Route::put('{id}/update', [TaskController::class, 'update']);
     Route::get('get/{id}', [TaskController::class, 'get']);
+    Route::delete('delete/{id}', [TaskController::class, 'delete']);
 });
 
 Route::group(['prefix' => 'user/{userId}/tasks'], function () {

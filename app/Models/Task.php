@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Task extends Model
@@ -21,8 +22,13 @@ class Task extends Model
         'stage'
     ];
 
-    public function user(): BelongsTo
+    public function users(): BelongsToMany
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class, 'user_tasks', 'task_id', 'user_id');
+    }
+
+    public function userTasks(): HasMany
+    {
+        return $this->hasMany(UserTask::class, 'task_id');
     }
 }

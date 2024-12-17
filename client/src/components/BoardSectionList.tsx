@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     useSensors,
     useSensor,
@@ -8,29 +8,31 @@ import {
     closestCorners,
     DragEndEvent,
     DragStartEvent,
-    DragOverEvent,
     DragOverlay,
-    DropAnimation,
     defaultDropAnimation,
+    DragOverEvent,
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates, arrayMove } from '@dnd-kit/sortable';
-import { INITIAL_TASKS } from '../data/index.js';
 import { BoardSections as BoardSectionsType } from '../types';
-import { getTaskById } from '../utils/tasks.js';
-import { findBoardSectionContainer, initializeBoard } from '../utils/board.ts';
-import BoardSection from './BoardSection.tsx';
-import TaskItem from './TaskItem.tsx';
-import { getAllTasks } from '../api.ts';
-
-const registeredTasks = getAllTasks();
+import { getTaskById } from '../utils/tasks';
+import { findBoardSectionContainer, initializeBoard } from '../utils/board';
+import BoardSection from './BoardSection';
+import TaskItem from './TaskItem';
+import { getAllTasks, updateTaskStatus } from '../api';
 
 const BoardSectionList = () => {
-    const tasks = INITIAL_TASKS;
-    const initialBoardSections = initializeBoard(INITIAL_TASKS);
-    const [boardSections, setBoardSections] =
-        useState<BoardSectionsType>(initialBoardSections);
-
+    const [tasks, setTasks] = useState([]);
+    const [boardSections, setBoardSections] = useState<BoardSectionsType>({});
     const [activeTaskId, setActiveTaskId] = useState<null | string>(null);
+
+    useEffect(() => {
+        const fetchTasks = async () => {
+            const registeredTasks = await getAllTasks();
+            setTasks(registeredTasks);
+            setBoardSections(initializeBoard(registeredTasks));
+        };
+        fetchTasks();
+    }, []);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -53,43 +55,35 @@ const BoardSectionList = () => {
             over?.id as string
         );
 
-        if (
-            !activeContainer ||
-            !overContainer ||
-            activeContainer === overContainer
-        ) {
+        if (!activeContainer || !overContainer || activeContainer === overContainer) {
             return;
         }
 
-        setBoardSections((boardSection) => {
-            const activeItems = boardSection[activeContainer];
-            const overItems = boardSection[overContainer];
-
-            const activeIndex = activeItems.findIndex(
+        setBoardSections((prevBoardSections) => {
+            const activeIndex = prevBoardSections[activeContainer].findIndex(
                 (item) => item.id === active.id
             );
-            const overIndex = overItems.findIndex((item) => item.id !== over?.id);
+            const overIndex = prevBoardSections[overContainer].findIndex(
+                (item) => item.id === over?.id
+            );
+
+            if (activeIndex === -1 || overIndex === -1) return prevBoardSections;
 
             return {
-                ...boardSection,
-                [activeContainer]: [
-                    ...boardSection[activeContainer].filter(
-                        (item) => item.id !== active.id
-                    ),
-                ],
+                ...prevBoardSections,
+                [activeContainer]: prevBoardSections[activeContainer].filter(
+                    (item) => item.id !== active.id
+                ),
                 [overContainer]: [
-                    ...boardSection[overContainer].slice(0, overIndex),
-                    boardSections[activeContainer][activeIndex],
-                    ...boardSection[overContainer].slice(
-                        overIndex,
-                        boardSection[overContainer].length
-                    ),
+                    ...prevBoardSections[overContainer].slice(0, overIndex),
+                    prevBoardSections[activeContainer][activeIndex],
+                    ...prevBoardSections[overContainer].slice(overIndex),
                 ],
             };
         });
     };
 
-    const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    const handleDragEnd = async ({ active, over }: DragEndEvent) => {
         const activeContainer = findBoardSectionContainer(
             boardSections,
             active.id as string
@@ -99,11 +93,8 @@ const BoardSectionList = () => {
             over?.id as string
         );
 
-        if (
-            !activeContainer ||
-            !overContainer ||
-            activeContainer !== overContainer
-        ) {
+        if (!activeContainer || !overContainer) {
+            setActiveTaskId(null);
             return;
         }
 
@@ -114,23 +105,42 @@ const BoardSectionList = () => {
             (task) => task.id === over?.id
         );
 
-        if (activeIndex !== overIndex) {
-            setBoardSections((boardSection) => ({
-                ...boardSection,
+        // Reeordenação na coluna
+        if (activeContainer === overContainer && activeIndex !== overIndex) {
+            setBoardSections((prevBoardSections) => ({
+                ...prevBoardSections,
                 [overContainer]: arrayMove(
-                    boardSection[overContainer],
+                    prevBoardSections[overContainer],
                     activeIndex,
                     overIndex
                 ),
             }));
         }
 
+        // Movimentação entre as colunas
+        if (activeContainer !== overContainer) {
+            setBoardSections((prevBoardSections) => ({
+                ...prevBoardSections,
+                [activeContainer]: prevBoardSections[activeContainer].filter(
+                    (item) => item.id !== active.id
+                ),
+                [overContainer]: [
+                    ...prevBoardSections[overContainer].slice(0, overIndex),
+                    prevBoardSections[activeContainer][activeIndex],
+                    ...prevBoardSections[overContainer].slice(overIndex),
+                ],
+            }));
+
+            await updateTaskStatus(active.id as string, overContainer);
+            const updatedTasks = await getAllTasks();
+            setTasks(updatedTasks);
+            setBoardSections(initializeBoard(updatedTasks));
+        }
+
         setActiveTaskId(null);
     };
 
-    const dropAnimation: DropAnimation = {
-        ...defaultDropAnimation,
-    };
+    const dropAnimation = { ...defaultDropAnimation };
 
     const task = activeTaskId ? getTaskById(tasks, activeTaskId) : null;
 
@@ -143,9 +153,9 @@ const BoardSectionList = () => {
                 onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
             >
-                <div className="gap-x-[80px] grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 ml-24 p-4 sm:grid-cols-2">
+                <div className="gap-x-[100px] grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 ml-24 p-4 sm:grid-cols-2">
                     {Object.keys(boardSections).map((boardSectionKey) => (
-                        <div className="" key={boardSectionKey}>
+                        <div key={boardSectionKey}>
                             <BoardSection
                                 id={boardSectionKey}
                                 title={boardSectionKey}

@@ -1,10 +1,13 @@
 export type Status = 'ideas' | 'todo' | 'doing' | 'done';
 
 export type Task = {
-    id: string;
+    id: number | string;
     title: string;
     description: string;
-    responsible: string[];
+    users: {
+        id: number | string;
+        name: string;
+    }[];
     date: string;
     stage: Status;
 };
