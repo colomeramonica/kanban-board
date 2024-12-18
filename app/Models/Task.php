@@ -24,11 +24,7 @@ class Task extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'user_tasks', 'task_id', 'user_id');
-    }
-
-    public function userTasks(): HasMany
-    {
-        return $this->hasMany(UserTask::class, 'task_id');
+        return $this->belongsToMany(User::class, 'user_tasks', 'task_id', 'user_id')
+            ->withTimestamps();
     }
 }
