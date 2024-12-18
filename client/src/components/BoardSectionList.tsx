@@ -171,7 +171,7 @@ const BoardSectionList = () => {
                 onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
             >
-                <div className="gap-x-[100px] grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 ml-24 p-4 sm:grid-cols-2">
+                <div className="md:gap-x-[200px] gap-x-[100px] grid grid-cols-1 lg:grid-cols-4 md:grid-cols-3 ml-24 p-4 sm:grid-cols-2">
                     {Object.keys(boardSections).map((boardSectionKey) => (
                         <div key={boardSectionKey}>
                             <BoardSection
