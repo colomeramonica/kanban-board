@@ -45,7 +45,7 @@ const BoardSectionList = () => {
         setActiveTaskId(active.id as string);
     };
 
-    const handleDragOver = ({ active, over }: DragOverEvent) => {
+    const handleDragOver = async ({ active, over }: DragOverEvent) => {
         const activeContainer = findBoardSectionContainer(
             boardSections,
             active.id as string
@@ -81,6 +81,11 @@ const BoardSectionList = () => {
                 ],
             };
         });
+
+        await updateTaskStatus(active.id as string, overContainer);
+        const updatedTasks = await getAllTasks();
+        setTasks(updatedTasks);
+        setBoardSections(initializeBoard(updatedTasks));
     };
 
     const handleDragEnd = async ({ active, over }: DragEndEvent) => {

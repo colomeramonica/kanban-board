@@ -26,4 +26,9 @@ class UserService
         }
         $user->update($data);
     }
+
+    public function generateToken($user)
+    {
+        return $user->createToken('API Token')->plainTextToken;
+    }
 }

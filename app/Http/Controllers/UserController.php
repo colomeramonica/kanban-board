@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\User\SignInRequest;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -31,12 +32,24 @@ class UserController extends Controller
         $user = $this->userService->getById($id);
         return response()->json($user);
     }
-    public function signIn(Request $request)
+
+    public function login(Request $request)
     {
-        $this->userService->store($request->all());
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+            $token = $this->userService->generateToken($user);
+
+            return response()->json([
+                'success' => true,
+                'token' => $token,
+            ]);
+        }
+
         return response()->json([
-            'success' => true,
-            'message' => "User created successfully.",
-        ], 201);
+            'success' => false,
+            'message' => 'Invalid credentials',
+        ], 401);
     }
 }

@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'users'], function () {
     Route::post('login', [UserController::class, 'login']);
-    Route::post('sign-in', [UserController::class, 'signIn']);
     Route::get('list', [UserController::class, 'listUsers']);
 });
 

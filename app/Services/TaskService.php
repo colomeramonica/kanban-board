@@ -45,7 +45,7 @@ class TaskService
         $task->delete();
     }
 
-    public function updateStatus($id, $status): void
+    public function updateStatus($id, array $status): void
     {
         $task = $this->getById($id);
         if (!$task) {

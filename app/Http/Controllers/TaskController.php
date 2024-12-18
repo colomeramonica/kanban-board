@@ -38,6 +38,7 @@ class TaskController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $request->all();
+
         $userId = $data['responsible'];
         unset($data['responsible']);
 
@@ -79,14 +80,6 @@ class TaskController extends Controller
 
     public function delete(int $id): JsonResponse
     {
-        $task = $this->taskService->getById($id);
-        if (!$task) {
-            return response()->json([
-                'success' => false,
-                'message' => "Task not found.",
-            ], 404);
-        }
-
         try {
             $this->taskService->delete($id);
         } catch (\Exception $e) {
