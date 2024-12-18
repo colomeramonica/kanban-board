@@ -46,7 +46,10 @@ export default function TaskCard({ task }: { task: Task }) {
         <>
             <div
                 className={`relative bg-white cursor-pointer flex-col h-44 justify-between max-w-80 mb-3 p-3 rounded-2xl w-80 ${task.stage === 'done' ? 'border-2 border-green-600' : ''} `}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    openTaskModal(e);
+                }}
             >
                 {task.stage === 'done' && (
                     <div className="absolute p-1 rounded-full top-[-12px]">
@@ -54,7 +57,7 @@ export default function TaskCard({ task }: { task: Task }) {
                     </div>
                 )}
                 <div className="flex flex-col gap-2">
-                    <h3 className="font-semibold text-slate-800 text-sm" onClick={openTaskModal}>
+                    <h3 className="font-semibold text-slate-800 text-sm">
                         {task.title}
                     </h3>
                 </div>

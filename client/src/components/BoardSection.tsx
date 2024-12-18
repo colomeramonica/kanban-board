@@ -29,7 +29,7 @@ const BoardSection = ({ id, title, tasks }: BoardSectionProps) => {
                 <div ref={setNodeRef}>
                     {tasks.map((task, index) => (
                         <div className="flex flex-col gap-4 rounded w-1/4" key={index}>
-                            <SortableTaskItem id={task.id}>
+                            <SortableTaskItem id={task.id.toString()} onClick={(e) => e.stopPropagation()}>
                                 <TaskItem task={task} />
                             </SortableTaskItem>
                         </div>

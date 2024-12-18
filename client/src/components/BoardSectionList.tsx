@@ -19,9 +19,13 @@ import { findBoardSectionContainer, initializeBoard } from '../utils/board';
 import BoardSection from './BoardSection';
 import TaskItem from './TaskItem';
 import { getAllTasks, updateTaskStatus } from '../api';
+import SortableTaskItem from './SortableTaskItem';
+import { createPortal } from 'react-dom';
+import TaskDetails from './TaskDetails';
 
 const BoardSectionList = () => {
     const [tasks, setTasks] = useState([]);
+    const [showModal, setShowModal] = useState(false);
     const [boardSections, setBoardSections] = useState<BoardSectionsType>({});
     const [activeTaskId, setActiveTaskId] = useState<null | string>(null);
 
@@ -149,6 +153,15 @@ const BoardSectionList = () => {
 
     const task = activeTaskId ? getTaskById(tasks, activeTaskId) : null;
 
+    const handleTaskClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setShowModal(true);
+    };
+
+    const onClose = () => {
+        setShowModal(false);
+    };
+
     return (
         <div>
             <DndContext
@@ -169,8 +182,15 @@ const BoardSectionList = () => {
                         </div>
                     ))}
                     <DragOverlay dropAnimation={dropAnimation}>
-                        {task ? <TaskItem task={task} /> : null}
+                        {task ? (
+                            <SortableTaskItem id={task.id.toString()} onClick={(e) => handleTaskClick(e)}>
+                                <TaskItem task={task} />
+                            </SortableTaskItem>
+                        ) : null}
                     </DragOverlay>
+                    {showModal && task &&
+                        createPortal(<TaskDetails task={task} onClose={onClose} />, document.body)
+                    }
                 </div>
             </DndContext>
         </div>

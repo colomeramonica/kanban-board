@@ -5,9 +5,10 @@ import { CSS } from '@dnd-kit/utilities';
 type SortableTaskItemProps = {
     children: React.ReactNode;
     id: string;
+    onClick: (e: React.MouseEvent) => void;
 };
 
-const SortableTaskItem = ({ children, id }: SortableTaskItemProps) => {
+const SortableTaskItem = ({ children, id, onClick }: SortableTaskItemProps) => {
     const {
         attributes,
         listeners,
@@ -24,7 +25,16 @@ const SortableTaskItem = ({ children, id }: SortableTaskItemProps) => {
     };
 
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+        <div
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            onClick={(e) => {
+                e.stopPropagation();
+                onClick(e);
+            }}
+        >
             {children}
         </div>
     );
