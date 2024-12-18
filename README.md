@@ -59,4 +59,6 @@ API: http://localhost:8000
 
 Frontend: http://localhost:5173
 
-### Caso não seja possível acessar com o Docker, os comandos para execução seguem os mesmos fora do container.
+#### Caso não seja possível acessar com o Docker, os comandos para execução seguem os mesmos fora do container.
+
+#### Nesse caso, é necessário possuir o composer, Laravel e node instalados localmente
