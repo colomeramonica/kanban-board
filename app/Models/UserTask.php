@@ -9,7 +9,7 @@ class UserTask extends Model
 {
     use HasFactory;
 
-    protected $table = 'user_tasks'; // Nome da tabela pivô
+    protected $table = 'user_tasks';
 
     protected $fillable = [
         'user_id',

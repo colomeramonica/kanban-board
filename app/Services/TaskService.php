@@ -27,7 +27,7 @@ class TaskService
     }
     public function update(int $id, array $data): bool
     {
-        $task = $this->getById($id);
+        $task = Task::find($id);
         if (!$task) {
             return null;
         }
